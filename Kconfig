@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-3.0
+
+menu "Zephyr"
+source "Kconfig.zephyr"
+endmenu
+
+module = APP
+module-str = BASIC_HTTP_SERVER
+source "subsys/logging/Kconfig.template.log_config"
