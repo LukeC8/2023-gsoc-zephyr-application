@@ -82,55 +82,55 @@ void main(void)
         exit(0);
     }
 
-	printf("Single-threaded basic HTTP server waits for a connection on "
-	       "port %d...\n", BIND_PORT);
+    printf("Single-threaded basic HTTP server waits for a connection on "
+            "port %d...\n", BIND_PORT);
 
     llhttp_settings_init(&settings);
 
     settings.on_message_complete = on_message_complete;
     settings.on_url = on_url;
 
-	while (1) {
+    while (1) {
         socket_client_t client;
-		char addr_str[32];
-		int req_state = 0;
-		const char *data;
-		size_t len;
+        char addr_str[32];
+        int req_state = 0;
+        const char *data;
+        size_t len;
 
         ret = socket_server_wait_client(&client, &server);
 
-		if (ret < 0) {
-			printf("Error in accept: %d - continuing\n", errno);
-			continue;
-		}
+        if (ret < 0) {
+            printf("Error in accept: %d - continuing\n", errno);
+            continue;
+        }
 
-		inet_ntop(client.addr.sin_family, &client.addr.sin_addr,
-			  addr_str, sizeof(addr_str));
-		printf("Connection #%d from %s\n", counter++, addr_str);
+        inet_ntop(client.addr.sin_family, &client.addr.sin_addr,
+                addr_str, sizeof(addr_str));
+        printf("Connection #%d from %s\n", counter++, addr_str);
 
         request.url_cursor = 0;
         request.status = 1;
         llhttp_init(&parser, HTTP_REQUEST, &settings);
 
-		while (1) {
-			ssize_t r;
-			char c;
+        while (1) {
+            ssize_t r;
+            char c;
             llhttp_errno_t err;
 
-			r = recv(client.socket_num, &c, 1, 0);
-			if (r == 0) {
-				goto close_client;
-			}
+            r = recv(client.socket_num, &c, 1, 0);
+            if (r == 0) {
+                goto close_client;
+            }
 
-			if (r < 0) {
-				if (errno == EAGAIN || errno == EINTR) {
-					continue;
-				}
+            if (r < 0) {
+                if (errno == EAGAIN || errno == EINTR) {
+                    continue;
+                }
 
-				printf("Got error %d when receiving from "
-				       "socket\n", errno);
-				goto close_client;
-			}
+                printf("Got error %d when receiving from "
+                        "socket\n", errno);
+                goto close_client;
+            }
 
             err = llhttp_execute(&parser, (const char *) &c, 1);
 
@@ -140,50 +140,50 @@ void main(void)
                 goto close_client;
             }
 
-			if (req_state == 0 && c == '\r') {
-				req_state++;
-			} else if (req_state == 1 && c == '\n') {
-				req_state++;
-			} else if (req_state == 2 && c == '\r') {
-				req_state++;
-			} else if (req_state == 3 && c == '\n') {
-				break;
-			} else {
-				req_state = 0;
-			}
-		}
+            if (req_state == 0 && c == '\r') {
+                req_state++;
+            } else if (req_state == 1 && c == '\n') {
+                req_state++;
+            } else if (req_state == 2 && c == '\r') {
+                req_state++;
+            } else if (req_state == 3 && c == '\n') {
+                break;
+            } else {
+                req_state = 0;
+            }
+        }
 
         data = handle_http_request(&request);
         len = strlen(data);
 
         while (len) {
-			int sent_len = send(client.socket_num, data, len, 0);
+            int sent_len = send(client.socket_num, data, len, 0);
 
-			if (sent_len == -1) {
-				printf("Error sending data to peer, errno: %d\n", errno);
-				break;
-			}
-			data += sent_len;
-			len -= sent_len;
-		}
+            if (sent_len == -1) {
+                printf("Error sending data to peer, errno: %d\n", errno);
+                break;
+            }
+            data += sent_len;
+            len -= sent_len;
+        }
 
 close_client:
-		ret = close(client.socket_num);
-		if (ret == 0) {
-			printf("Connection from %s closed\n", addr_str);
-		} else {
-			printf("Got error %d while closing the "
-			       "socket\n", errno);
-		}
+        ret = close(client.socket_num);
+        if (ret == 0) {
+            printf("Connection from %s closed\n", addr_str);
+        } else {
+            printf("Got error %d while closing the "
+                    "socket\n", errno);
+        }
 
 #if defined(__ZEPHYR__) && defined(CONFIG_NET_BUF_POOL_USAGE)
-		struct k_mem_slab *rx, *tx;
-		struct net_buf_pool *rx_data, *tx_data;
+        struct k_mem_slab *rx, *tx;
+        struct net_buf_pool *rx_data, *tx_data;
 
-		net_pkt_get_info(&rx, &tx, &rx_data, &tx_data);
-		printf("rx buf: %d, tx buf: %d\n",
-		       atomic_get(&rx_data->avail_count), atomic_get(&tx_data->avail_count));
+        net_pkt_get_info(&rx, &tx, &rx_data, &tx_data);
+        printf("rx buf: %d, tx buf: %d\n",
+                atomic_get(&rx_data->avail_count), atomic_get(&tx_data->avail_count));
 #endif
 
-	}
+    }
 }
