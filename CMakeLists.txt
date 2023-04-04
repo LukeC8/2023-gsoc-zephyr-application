@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # Basic Http Server
 #
-# SPDX-License-Identifier: GPL-3.0
+# SPDX-License-Identifier: Apache-2.0
 
 include(FetchContent)
 cmake_minimum_required(VERSION 3.20.0)
