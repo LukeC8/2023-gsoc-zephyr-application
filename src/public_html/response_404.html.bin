@@ -1,0 +1,19 @@
+HTTP/1.0 404 Not Found
+server: zephyr_os
+Content-Type: text/html; charset=utf-8
+
+<html>
+<style>
+body {
+  background-color: #f3f5f6;
+  font-family: "sans-serif";
+}
+</style>
+</head>
+
+<body>
+<div>
+ <h1>404 - :(</h1>
+</div>
+</body>
+</html>
