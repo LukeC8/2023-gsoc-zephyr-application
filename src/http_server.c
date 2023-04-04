@@ -94,7 +94,7 @@ void main(void)
         socket_client_t client;
         char addr_str[32];
         int req_state = 0;
-        const char *data;
+        const char *response;
         size_t len;
 
         ret = socket_server_wait_client(&client, &server);
@@ -153,17 +153,17 @@ void main(void)
             }
         }
 
-        data = handle_http_request(&request);
-        len = strlen(data);
+        response = handle_http_request(&request);
+        len = strlen(response);
 
         while (len) {
-            int sent_len = send(client.socket_num, data, len, 0);
+            int sent_len = send(client.socket_num, response, len, 0);
 
             if (sent_len == -1) {
                 printf("Error sending data to peer, errno: %d\n", errno);
                 break;
             }
-            data += sent_len;
+            response += sent_len;
             len -= sent_len;
         }
 
